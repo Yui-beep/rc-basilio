@@ -15,7 +15,7 @@ void setup(){
 
 void loop(){ 
   
-  sine = sin(x*3.1416/180); //pi?
+  sine = sin(x*3.1416/180); 
   frequency = (int(sine*500));
   if(x>90){ 
     x = 0; 
