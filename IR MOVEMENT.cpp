@@ -1,4 +1,4 @@
-byte sensorPin = 3;
+byte sensorPin = 6;
 byte indicator = 13;
 void setup()
 {
