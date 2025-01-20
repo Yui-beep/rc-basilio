@@ -13,5 +13,5 @@ void loop()
   digitalWrite(indicator,state);
   if(state == 1)Serial.println("Somebody is in this area!");
   else if(state == 0)Serial.println("No one!");
-  delay(500);
+  delay(300);
 }
