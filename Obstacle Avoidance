@@ -1,0 +1,16 @@
+#define IRpin 2
+#define ledPin 13
+void setup() {
+  // put your  setup code here, to run once:
+pinMode(IRpin,INPUT);
+pinMode(ledPin,OUTPUT);
+}
+
+void  loop() {
+  // put your main code here, to run repeatedly:
+  int IRread = digitalRead(IRpin);
+  digitalWrite(ledPin,LOW);
+if(IRread == 0){
+  digitalWrite(ledPin,HIGH);
+}
+}
