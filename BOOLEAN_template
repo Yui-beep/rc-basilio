@@ -1,0 +1,29 @@
+#include <iostream>
+
+int main() {
+    bool condition = true;
+    int counter = 0;
+
+    while (condition) {
+        std::cout << "Counter: " << counter << std::endl;
+        counter++;
+
+        if (counter >= 5) {
+            condition = false;
+        }
+    }
+
+    std::cout << "Loop terminated." << std::endl;
+    return 0;
+}
+
+int main() {
+    bool condition = true;
+
+    while (condition) {
+        std::cout << "This loop will run forever." << std::endl;
+        // No code to change the condition to false
+    }
+
+    return 0;
+}
