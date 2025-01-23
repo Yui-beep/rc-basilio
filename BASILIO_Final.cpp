@@ -5,6 +5,10 @@
 
 #include <SimpleDHT.h> 
 
+// Collision Sensor
+#define COL_SENSOR
+
+// Motion sensor (PIR)
 #define PIR_SENSOR      A5 // PIR sensor (pins:1)
 
 // Ultrasonic sensor (pins:2)
@@ -16,8 +20,6 @@
 #define IR_LED          9
 #define ULT_LED         10
 #define PIR_LED         13
-
-// Removed HT_SENSOR and LDR_SENSOR (A4) definitions
 
 void setup() {
   // Begin serial communication for Serial Monitor
