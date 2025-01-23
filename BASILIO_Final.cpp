@@ -6,7 +6,7 @@
 #include <SimpleDHT.h> 
 
 // Collision Sensor
-#define COL_SENSOR
+#define COL_SENSOR      2
 
 // Motion sensor (PIR)
 #define PIR_SENSOR      A5 // PIR sensor (pins:1)
@@ -14,6 +14,8 @@
 // Ultrasonic sensor (pins:2)
 #define ULT_TRIG        A3
 #define ULT_ECHO        A2
+
+// IR sensor 
 #define IR_SENSOR       A1 // IR sensor (pins:1)
 
 // leds (pins:5)
