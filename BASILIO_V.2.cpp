@@ -10,8 +10,8 @@
 // Sensor Pins
 #define CS_SENSOR 2
 #define PIR_SENSOR A5
-#define ULT_TRIG A3
-#define ULT_ECHO A2
+#define ULT_TRIG A4
+#define ULT_ECHO A3
 #define IR_SENSOR A1
 
 // Define IR codes (replace with your phone's IR codes after decoding)
@@ -128,4 +128,38 @@ void stopMotors() {
   digitalWrite(MOTOR_LEFT, LOW);
   digitalWrite(MOTOR_RIGHT, LOW);
   Serial.println("Motors Stopped");
+}
+
+int readSensorDistance() {
+  // Replace with your actual sensor reading code
+  int sensorValue = 0;
+  
+  // Your sensor reading logic here
+  // For example, if using an ultrasonic sensor
+  // sensorValue = analogRead(sensorPin);
+  
+  return sensorValue;
+}
+
+void setMotorSpeed(int leftSpeed, int rightSpeed) {
+  // Replace with your motor control code
+  // For example, if using a motor driver
+  // analogWrite(leftMotorPin, leftSpeed);
+  // analogWrite(rightMotorPin, rightSpeed);
+}
+
+int main() {
+  while (true) {
+    int distance = readSensorDistance();
+    
+    if (distance < 20) { // Adjust threshold as needed
+      // Stop the RC when obstacle is close
+      setMotorSpeed(0, 0);
+    } else {
+      // Continue driving at desired speed
+      setMotorSpeed(50, 50); // 
+    }
+    delay(100);
+  }
+  return 0;
 }
