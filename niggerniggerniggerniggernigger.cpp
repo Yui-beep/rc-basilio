@@ -1,5 +1,4 @@
 #include <Wire.h>
-#include <IRremote.h>
 
 // L298N Motor Control Pins
 #define ENA 9  
@@ -21,11 +20,12 @@ const float G_TO_MPS2 = 9.80665;
 const int SAFE_DISTANCE = 20;  // Safe distance in cm
 const int MOTOR_MAX_SPEED = 200; // Max motor speed
 const int MOTOR_MIN_SPEED = 50;   // Min speed before stopping
+const int STOP_THRESHOLD = 5;     // Stop motor if distance < 5cm
 const int SLOWDOWN_STEP = 10;    // Speed decrement step
 
 // Variables
-float velocity = 0.0;
 int currentSpeed = MOTOR_MAX_SPEED; // Default motor speed
+bool pirDetected = false;
 
 void setup() {
     Serial.begin(9600);
@@ -51,45 +51,33 @@ void setup() {
 }
 
 void loop() {
-    checkPIRSensor(); // Check PIR and print if obstacle is detected
-    adjustSpeedBasedOnDistance(); // Adjust speed dynamically based on ultrasonic
+    pirDetected = digitalRead(PIR_SENSOR);  // Check PIR Sensor
+    int distance = readUltrasonicSensor();  // Check Ultrasonic Sensor
 
-    float accelX, accelY, accelZ;
-    readAcceleration(accelX, accelY, accelZ);
-    float ax_mps2 = accelX * G_TO_MPS2;
-
-    Serial.print("Accel X: ");
-    Serial.print(ax_mps2);
-    Serial.print(" | Speed: ");
-    Serial.println(currentSpeed);
+    // **PIR SENSOR CONTROL**
+    if (pirDetected) {
+        stopMotors();
+        Serial.println(" PIR Detected Motion! Stopping Motors.");
+    } 
+    // **ULTRASONIC SENSOR CONTROL**
+    else {
+        if (distance < STOP_THRESHOLD) {
+            stopMotors();
+            Serial.println("Obstacle Too Close! Stopping Motors.");
+        } 
+        else if (distance < SAFE_DISTANCE) {
+            currentSpeed = map(distance, STOP_THRESHOLD, SAFE_DISTANCE, MOTOR_MIN_SPEED, MOTOR_MAX_SPEED);
+            analogWrite(ENA, currentSpeed);
+            analogWrite(ENB, currentSpeed);
+            Serial.print(" Slowing Down... Speed: ");
+            Serial.println(currentSpeed);
+        } 
+        else {
+            runMotorsForward(); // Move at full speed if path is clear
+        }
+    }
 
     delay(100);
-}
-
-void checkPIRSensor() {
-    bool pirDetected = digitalRead(PIR_SENSOR);
-    if (pirDetected) {
-        Serial.println("Obstacle detected (PIR Sensor)");
-    }
-}
-
-void adjustSpeedBasedOnDistance() {
-    int distance = readUltrasonicSensor();
-
-    if (distance < SAFE_DISTANCE) {
-        currentSpeed = map(distance, 0, SAFE_DISTANCE, MOTOR_MIN_SPEED, MOTOR_MAX_SPEED);
-        if (currentSpeed < MOTOR_MIN_SPEED) {
-            currentSpeed = MOTOR_MIN_SPEED;
-        }
-    } else {
-        currentSpeed = MOTOR_MAX_SPEED;
-    }
-
-    analogWrite(ENA, currentSpeed);
-    analogWrite(ENB, currentSpeed);
-
-    Serial.print("Adjusted Speed: ");
-    Serial.println(currentSpeed);
 }
 
 int readUltrasonicSensor() {
@@ -101,7 +89,7 @@ int readUltrasonicSensor() {
 
     long duration = pulseIn(ULT_ECHO, HIGH);
     int distance = duration * 0.0343 / 2;
-    Serial.print("Ultrasonic Distance: ");
+    Serial.print(" Distance: ");
     Serial.println(distance);
     return distance;
 }
@@ -114,7 +102,17 @@ void runMotorsForward() {
     digitalWrite(IN4, LOW);
     analogWrite(ENA, currentSpeed);
     analogWrite(ENB, currentSpeed);
-    Serial.println("Motors Moving Forward");
+    Serial.println(" Motors Moving Forward");
+}
+
+void stopMotors() {
+    digitalWrite(IN1, LOW);
+    digitalWrite(IN2, LOW);
+    digitalWrite(IN3, LOW);
+    digitalWrite(IN4, LOW);
+    analogWrite(ENA, 0);
+    analogWrite(ENB, 0);
+    Serial.println("Motors Stopped");
 }
 
 void setupMMA8452Q() {
@@ -122,23 +120,4 @@ void setupMMA8452Q() {
     Wire.write(0x2A);
     Wire.write(0x01);
     Wire.endTransmission();
-}
-
-void readAcceleration(float &ax, float &ay, float &az) {
-    Wire.beginTransmission(MMA8452Q_ADDR);
-    Wire.write(0x01);
-    Wire.endTransmission(false);
-    Wire.requestFrom(MMA8452Q_ADDR, 6);
-    
-    if (Wire.available() == 6) {
-        int16_t rawX = (Wire.read() << 8) | Wire.read();
-        int16_t rawY = (Wire.read() << 8) | Wire.read();
-        int16_t rawZ = (Wire.read() << 8) | Wire.read();
-        ax = rawX * ACCEL_SCALE;
-        ay = rawY * ACCEL_SCALE;
-        az = rawZ * ACCEL_SCALE;
-    } else {
-        Serial.println("Failed to read accelerometer data");
-        ax = ay = az = 0;
-    }
 }
