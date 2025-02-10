@@ -1,2 +1,70 @@
-wassup par
-tanong ko lang pano to ilalagay sqa sensor mismo HAHAHHAHA
+# 🛠 **Arduino Uno R3 Pinout (Text Version)**
+
+## **🟠 Digital Pins (0-13)**
+| Pin | Function        | Special Features |
+|-----|---------------|------------------|
+| D0  | RX           | Serial Receive (UART) |
+| D1  | TX           | Serial Transmit (UART) |
+| D2  | Digital I/O  | Interrupt (INT0) |
+| D3  | Digital I/O  | PWM, Interrupt (INT1) |
+| D4  | Digital I/O  | - |
+| D5  | Digital I/O  | PWM |
+| D6  | Digital I/O  | PWM |
+| D7  | Digital I/O  | - |
+| D8  | Digital I/O  | - |
+| D9  | Digital I/O  | PWM |
+| D10 | Digital I/O  | PWM, SPI (SS) |
+| D11 | Digital I/O  | PWM, SPI (MOSI) |
+| D12 | Digital I/O  | SPI (MISO) |
+| D13 | Digital I/O  | SPI (SCK), **LED_BUILTIN** |
+
+---
+
+## **🟢 Analog Pins (A0-A5)**
+| Pin | Function | Special Features |
+|-----|---------|------------------|
+| A0  | Analog Input | ADC (10-bit) |
+| A1  | Analog Input | ADC (10-bit) |
+| A2  | Analog Input | ADC (10-bit) |
+| A3  | Analog Input | ADC (10-bit) |
+| A4  | Analog Input | **I2C (SDA)** |
+| A5  | Analog Input | **I2C (SCL)** |
+
+---
+
+## **🔵 I2C Pins**
+| Pin | Function | Special Features |
+|-----|---------|------------------|
+| A4  | SDA (Data) | I2C Communication |
+| A5  | SCL (Clock) | I2C Communication |
+
+---
+
+## **🔵 SPI Pins**
+| Pin  | Function | Special Features |
+|------|---------|------------------|
+| D10  | SS      | Slave Select |
+| D11  | MOSI    | Master Out, Slave In |
+| D12  | MISO    | Master In, Slave Out |
+| D13  | SCK     | Serial Clock |
+
+---
+
+## **🔴 Power Pins**
+| Pin  | Voltage | Function |
+|------|---------|----------|
+| 3.3V | 3.3V   | Low-voltage power output |
+| 5V   | 5V     | Main power output |
+| GND  | 0V     | Ground |
+| Vin  | 7-12V  | External power input |
+
+---
+
+## **⚫ Miscellaneous Pins**
+| Pin  | Function |
+|------|----------|
+| Reset | Resets the Arduino |
+| IOREF | Reference voltage for shields |
+| AREF  | Analog Reference for ADC |
+
+---
