@@ -1,0 +1,177 @@
+#include <Wire.h>  // Library for I2C communication (Accelerometer)
+
+// L298N Motor Driver Pinouts
+#define ENA 9   // PWM for Motor A
+#define ENB 10  // PWM for Motor B
+#define IN1 8   // Motor A Direction
+#define IN2 7   // Motor A Direction
+#define IN3 6   // Motor B Direction
+#define IN4 5   // Motor B Direction
+
+// PIR Motion Sensor
+#define PIR_SENSOR 2  // Digital input from PIR
+
+// Ultrasonic Sensor (HC-SR04)
+#define ULT_TRIG 12   // Trigger pin
+#define ULT_ECHO 11   // Echo pin
+
+// Accelerometer (MMA8452Q) - I2C Pins
+#define MMA8452Q_ADDR 0x1D  // Default I2C address (can be 0x1C)
+
+// Constants & Variables
+const int MOTOR_MAX_SPEED = 255;  // Full speed (PWM max is 255)
+const int MOTOR_STOP = 0;         // Motor off
+const int SAFE_DISTANCE = 20;      // cm (Slow down)
+const int STOP_THRESHOLD = 5;      // cm (Immediate stop)
+const float TILT_THRESHOLD = 0.5;  // If tilt exceeds ±0.5g, stop motors
+
+bool pirDetected = false;  // PIR motion detection flag
+int currentSpeed = MOTOR_MAX_SPEED;  // Stores current speed
+
+void setup() {
+    Serial.begin(9600);
+
+    // Motor Pins Setup
+    pinMode(ENA, OUTPUT);
+    pinMode(ENB, OUTPUT);
+    pinMode(IN1, OUTPUT);
+    pinMode(IN2, OUTPUT);
+    pinMode(IN3, OUTPUT);
+    pinMode(IN4, OUTPUT);
+
+    // Sensor Pins Setup
+    pinMode(PIR_SENSOR, INPUT);
+    pinMode(ULT_TRIG, OUTPUT);
+    pinMode(ULT_ECHO, INPUT);
+
+    // Initialize I2C for Accelerometer
+    Wire.begin();
+    setupMMA8452Q();
+
+    // Start Motors at Full Speed
+    runMotorsForward(MOTOR_MAX_SPEED);
+    Serial.println("System Initialized. Motors Running at Full Speed.");
+}
+
+void loop() {
+    pirDetected = stablePIRDetection();  // Check PIR Sensor
+    int distance = readUltrasonicSensor();  // Check Ultrasonic Sensor
+    float tilt = readAccelerometerTilt();   // Check Accelerometer Tilt
+
+    // Print sensor readings for debugging
+    Serial.print("PIR: "); Serial.print(pirDetected ? "Motion Detected" : "No Motion");
+    Serial.print(" | Distance: "); Serial.print(distance); Serial.print(" cm");
+    Serial.print(" | Tilt: "); Serial.print(tilt, 3); Serial.print(" g");
+    Serial.print(" | Motor Speed: "); Serial.println(currentSpeed);
+
+    // Control Logic
+    if (pirDetected) {
+        stopMotors();
+        Serial.println("PIR Detected Motion. Stopping Motors.");
+    }
+    else if (distance < STOP_THRESHOLD) {
+        stopMotors();
+        Serial.println("Obstacle Too Close. Stopping Motors.");
+    }
+    else if (distance < SAFE_DISTANCE) {
+        int targetSpeed = map(distance, STOP_THRESHOLD, SAFE_DISTANCE, 100, MOTOR_MAX_SPEED);
+        changeSpeedGradually(targetSpeed);
+    }
+    else if (tilt > TILT_THRESHOLD || tilt < -TILT_THRESHOLD) {
+        stopMotors();
+        Serial.println("Tilt Detected. Stopping Motors for Safety.");
+    }
+    else {
+        changeSpeedGradually(MOTOR_MAX_SPEED);
+    }
+
+    delay(200);  // Stable data logging
+}
+
+// Function to Read Ultrasonic Sensor
+int readUltrasonicSensor() {
+    static int lastValidDistance = SAFE_DISTANCE; // Store last valid distance
+
+    digitalWrite(ULT_TRIG, LOW);
+    delayMicroseconds(2);
+    digitalWrite(ULT_TRIG, HIGH);
+    delayMicroseconds(10);
+    digitalWrite(ULT_TRIG, LOW);
+
+    long duration = pulseIn(ULT_ECHO, HIGH, 30000);  // 30ms timeout
+    if (duration == 0) {
+        return lastValidDistance;  // Return last known distance
+    }
+
+    int distance = duration * 0.0343 / 2;
+    lastValidDistance = distance;  // Update valid distance
+    return distance;
+}
+
+// Function to Read PIR Sensor with Debounce
+bool stablePIRDetection() {
+    int count = 0;
+    for (int i = 0; i < 5; i++) {
+        if (digitalRead(PIR_SENSOR)) count++;
+        delay(20);
+    }
+    return (count >= 3);
+}
+
+// Function to Run Motors Forward
+void runMotorsForward(int speed) {
+    currentSpeed = speed;
+    digitalWrite(IN1, HIGH);
+    digitalWrite(IN2, LOW);
+    digitalWrite(IN3, HIGH);
+    digitalWrite(IN4, LOW);
+    analogWrite(ENA, speed);
+    analogWrite(ENB, speed);
+}
+
+// Function to Stop Motors
+void stopMotors() {
+    currentSpeed = MOTOR_STOP;
+    digitalWrite(IN1, LOW);
+    digitalWrite(IN2, LOW);
+    digitalWrite(IN3, LOW);
+    digitalWrite(IN4, LOW);
+    analogWrite(ENA, MOTOR_STOP);
+    analogWrite(ENB, MOTOR_STOP);
+}
+
+// Function for Smooth Speed Change
+void changeSpeedGradually(int targetSpeed) {
+    while (currentSpeed != targetSpeed) {
+        if (currentSpeed < targetSpeed) {
+            currentSpeed += 5;
+        } else {
+            currentSpeed -= 5;
+        }
+        runMotorsForward(currentSpeed);
+        delay(50);  // Smooth transition delay
+    }
+}
+
+// Function to Initialize MMA8452Q Accelerometer
+void setupMMA8452Q() {
+    Wire.beginTransmission(MMA8452Q_ADDR);
+    Wire.write(0x2A);  // Control register
+    Wire.write(0x01);  // Set Active Mode
+    Wire.endTransmission();
+}
+
+// Function to Read Accelerometer Tilt (X-Axis)
+float readAccelerometerTilt() {
+    Wire.beginTransmission(MMA8452Q_ADDR);
+    Wire.write(0x01);  // Start reading at OUT_X_MSB
+    Wire.endTransmission(false);
+    Wire.requestFrom(MMA8452Q_ADDR, 2);  // Request 2 bytes
+
+    if (Wire.available() >= 2) {
+        int16_t rawData = (Wire.read() << 8) | Wire.read();
+        return rawData * 0.000244;  // Convert to g (assuming 2g sensitivity)
+    }
+    return 0.0;
+}
+
