@@ -1,3 +1,5 @@
+// idfk BASILIO, 2025
+
 #include <Wire.h>  // Library for I2C communication (Accelerometer)
 
 // L298N Motor Driver Pinouts
