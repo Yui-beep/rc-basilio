@@ -1,15 +1,15 @@
-# 🛠 **Arduino Uno R3 Pinout (Text Version)**
+# Arduino Uno R3 Pinout
 
-## **🟠 Digital Pins (0-13)**
-| Pin | Function        | Special Features |
-|-----|---------------|------------------|
+## Digital Pins (0-13)
+| Pin | Function     | Special Features |
+|-----|--------------|------------------|
 | D0  | RX           | Serial Receive (UART) |
 | D1  | TX           | Serial Transmit (UART) |
 | D2  | Digital I/O  | Interrupt (INT0) |
 | D3  | Digital I/O  | PWM, Interrupt (INT1) |
-| D4  | Digital I/O  | - |
-| D5  | Digital I/O  | PWM |
-| D6  | Digital I/O  | PWM |
+| D4  | Digital I/O  | -------------------------- |
+| D5  | Digital I/O  |            PWM            |
+| D6  | Digital I/O  |            PWM            |
 | D7  | Digital I/O  | - |
 | D8  | Digital I/O  | - |
 | D9  | Digital I/O  | PWM |
@@ -20,15 +20,15 @@
 
 ---
 
-## **🟢 Analog Pins (A0-A5)**
-| Pin | Function | Special Features |
-|-----|---------|------------------|
-| A0  | Analog Input | ADC (10-bit) |
-| A1  | Analog Input | ADC (10-bit) |
-| A2  | Analog Input | ADC (10-bit) |
-| A3  | Analog Input | ADC (10-bit) |
-| A4  | Analog Input | **I2C (SDA)** |
-| A5  | Analog Input | **I2C (SCL)** |
+## Analog Pins (A0-A5)
+| Pin |   Function   | Special Features |
+|-----|--------------|------------------|
+| A0  | Analog Input |   ADC (10-bit)   |
+| A1  | Analog Input |   ADC (10-bit)   |
+| A2  | Analog Input |   ADC (10-bit)   |
+| A3  | Analog Input |   ADC (10-bit)   |
+| A4  | Analog Input |  **I2C (SDA)**   |
+| A5  | Analog Input |  **I2C (SCL)**   |
 
 ---
 
